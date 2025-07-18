@@ -1,2 +1,3 @@
 .vscode/
 lib/windfield/.DS_Store
+res/*
