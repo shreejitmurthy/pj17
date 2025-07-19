@@ -55,7 +55,7 @@ setmetatable(player, {__index = actor})
 function player:init()
     local p = actor.new(self, (_G.confw.width / 2), (_G.confw.height / 2), "player")
     setmetatable(p, {__index = player})
-    p.img = love.graphics.newImage("res/images/guy.png")
+    p.img = love.graphics.newImage("res/images/dude.png")
     p.img:setFilter("nearest", "nearest")
 
     p.maxSpeed = 150
@@ -75,6 +75,8 @@ function player:init()
     p.collider:setCollisionClass("Player")
     p.grounded = false
 
+    p.dir = 1
+
     return p
 end
 
@@ -84,8 +86,10 @@ function player:update(dt)
 
     if love.keyboard.isDown(self.controls.right) then
         desiredVX = self.maxSpeed
+        self.dir = 1
     elseif love.keyboard.isDown(self.controls.left) then
         desiredVX = -self.maxSpeed
+        self.dir = -1
     end
 
     -- Accelerate or decelerate
@@ -123,7 +127,7 @@ end
 
 
 function player:draw()
-    love.graphics.draw(self.img, self.x, self.y, 0, 1, 1, 7, 8)
+    love.graphics.draw(self.img, self.x, self.y, 0, self.dir, 1, 7, 8)
 end
 
 function love.load()
@@ -139,9 +143,13 @@ function love.load()
 
     state:init(player:init())
 
-    cam = camera(nil, nil, 2)
+    cam = camera(nil, nil, 4)
     local player = state:getActor("player")
     cam_x, cam_y = player.x, player.y
+end
+
+function lerp(v, g, s, dt)
+    v = v + (g - v) * math.min(s * dt, 1)
 end
 
 function love.update(dt)
@@ -152,6 +160,7 @@ function love.update(dt)
     local lerpSpeed = 8
     cam_x = cam_x + (player.x - cam_x) * math.min(lerpSpeed * dt, 1)
     cam_y = cam_y + (player.y - cam_y) * math.min(lerpSpeed * dt, 1)
+    -- lerp(cam_x, player.x, lerpSpeed, dt)
 
     cam:lookAt(cam_x, cam_y)
 end
@@ -164,7 +173,7 @@ function love.draw()
         love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         love.graphics.setColor(1, 1, 1)
         state:draw()
-        world:draw()
+        -- world:draw(0.5)
     cam:detach()
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
