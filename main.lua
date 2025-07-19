@@ -166,6 +166,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.setBackgroundColor(0.5, 0.5, 0.5)
     local player = state:getActor("player")
     love.graphics.setColor(1, 1, 1)
     cam:attach()
