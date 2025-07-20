@@ -83,12 +83,12 @@ function love.draw()
         if debug then
             world:draw(0.5)
             drawMapBorders()
-            player:debug()
+            if player then player:debug() end
         end
     cam:detach()
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
+    if player then love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10) end
     love.graphics.print("debug: " .. tostring(debug), 10, 30)
 end
 
