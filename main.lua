@@ -3,6 +3,7 @@ require "scripts.actor"
 wf = require "lib.windfield"
 
 require "scripts.utils"
+require "scripts.world"
 require "scripts.player"
 
 state = {
@@ -39,15 +40,13 @@ function state:draw()
     end
 end
 
-world = wf.newWorld(0, 600, true)
-world:addCollisionClass("Player")
-world:addCollisionClass("Ground")
-
 platform = {}
 
 cam_x, cam_y = 0, 0
 
 function love.load()
+    love.graphics.setDefaultFilter("nearest", "nearest")
+
     platform.width = _G.confw.width
     platform.height = 40
     platform.x = 0
