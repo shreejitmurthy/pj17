@@ -6,6 +6,19 @@ world:addCollisionClass("Ground")
 
 gameMap = sti("res/maps/test.lua")
 
+tile_size = 8
+map_width = gameMap.layers["Stone"].width * tile_size
+map_height = gameMap.layers["Stone"].height * tile_size
+
+function drawMapBorders()
+    love.graphics.setColor(0, 0, 0.8)
+    love.graphics.setLineWidth(0.25)
+    love.graphics.line(0, 0, 0, gameMap.layers["Stone"].height * 8)
+    love.graphics.line(0, map_height, map_width, gameMap.layers["Stone"].height * 8)
+    love.graphics.line(map_width, map_height, map_width, 0)
+    love.graphics.line(map_width, 0, 0, 0)
+end
+
 function createCollidable(object, collisionClass)
     local collidable
     if object.shape == "rectangle" then
@@ -37,7 +50,7 @@ function processLayer(layerName, collisionClass)
     end
 end
 
-function init_map()
+function initMap()
     collidables = {}
 
     processLayer("Ground", "Ground")
@@ -53,6 +66,6 @@ function init_map()
     -- end
 end
 
-function draw_map()
+function drawMap()
     gameMap:drawLayer(gameMap.layers["Stone"])
 end
