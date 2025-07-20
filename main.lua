@@ -40,22 +40,13 @@ function state:draw()
     end
 end
 
-platform = {}
 
 cam_x, cam_y = 0, 0
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-    platform.width = _G.confw.width
-    platform.height = 40
-    platform.x = 0
-    platform.y = _G.confw.height / 2 + 60
-
-    -- Create a static ground collider
-    platform.collider = world:newRectangleCollider(platform.x, platform.y, platform.width, platform.height)
-    platform.collider:setType("static")
-    platform.collider:setCollisionClass("Ground")
+    background = love.graphics.newImage("res/images/InertiaCavernBackgroundGameJam.png")
 
     state:init(player:init())
 
@@ -63,7 +54,7 @@ function love.load()
     local player = state:getActor("player")
     cam_x, cam_y = player.x, player.y
 
-    init_map()
+    initMap()
 end
 
 function love.update(dt)
@@ -78,28 +69,36 @@ function love.update(dt)
     cam:lookAt(cam_x, cam_y)
 end
 
+local debug = false
+
 function love.draw()
     love.graphics.setBackgroundColor(0.5, 0.5, 0.5)
     local player = state:getActor("player")
-    love.graphics.setColor(1, 1, 1)
 
     cam:attach()
-        love.graphics.setColor(0.3, 0.3, 0.3)
-        love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         love.graphics.setColor(1, 1, 1)
+        drawMap()
         state:draw()
-        -- world:draw(0.5)
-        draw_map()
+
+        if debug then
+            world:draw(0.5)
+            drawMapBorders()
+            player:debug()
+        end
     cam:detach()
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
-    love.graphics.print(tostring(player.state), 10, 30)
+    love.graphics.print("debug: " .. tostring(debug), 10, 30)
 end
 
 function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
+    end
+
+    if key == '/' then
+        debug = not debug
     end
 
     local player = state:getActor("player")
