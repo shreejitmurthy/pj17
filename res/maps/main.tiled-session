@@ -7,8 +7,19 @@
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "test.tmx": {
+            "scale": 3.9883,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 84.99862096632651,
+                "y": 58.170147681969766
+            }
+        },
+        "test.tmx#Stone": {
+            "scaleInDock": 2.6739
+        }
     },
-    "last.exportedFilePath": "C:/Users/botmo/dev/pj17/res/maps",
+    "last.exportedFilePath": "/Users/shree/dev/lua/pj17/res/maps",
     "last.imagePath": "/Users/shree/dev/lua/pj17/res/images/tiles",
     "map.height": 16,
     "map.lastUsedExportFilter": "Lua files (*.lua)",
@@ -20,6 +31,7 @@
     ],
     "project": "main.tiled-project",
     "recentFiles": [
+        "test.tmx"
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {

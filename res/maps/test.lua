@@ -1,7 +1,7 @@
 return {
   version = "1.10",
   luaversion = "5.1",
-  tiledversion = "1.11.2",
+  tiledversion = "1.10.2",
   class = "",
   orientation = "orthogonal",
   renderorder = "right-down",
@@ -51,7 +51,7 @@ return {
       width = 16,
       height = 16,
       id = 1,
-      name = "Stone ",
+      name = "Stone",
       class = "",
       visible = true,
       opacity = 1,
