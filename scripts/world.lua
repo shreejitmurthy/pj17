@@ -54,8 +54,5 @@ function init_map()
 end
 
 function draw_map()
-    gameMap:drawLayer(gameMap.layers["Ground"])
-    -- gameMap:drawLayer(gameMap.layers["Water"])
-    -- gameMap:drawLayer(gameMap.layers["Grass"])
-    -- zone:drawAll()
+    gameMap:drawLayer(gameMap.layers["Stone"])
 end
