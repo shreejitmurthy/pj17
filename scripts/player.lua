@@ -35,6 +35,8 @@ function player:init()
 
     p.dir = 1
 
+    p.state = states.IDLE
+
     p.animations = {}
     p.spritesheet1 = newSpritesheet("res/images/player/atlas.png", 16, 16, 0, 0)
     p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.2)
@@ -51,9 +53,13 @@ function player:update(dt)
     if love.keyboard.isDown(self.controls.right) then
         desiredVX = self.maxSpeed
         self.dir = 1
+        self.state = states.RUN
     elseif love.keyboard.isDown(self.controls.left) then
         desiredVX = -self.maxSpeed
         self.dir = -1
+        self.state = states.RUN
+    else
+        self.state = states.IDLE
     end
 
     -- Accelerate or decelerate
@@ -83,10 +89,10 @@ function player:update(dt)
         self.grounded = false
     end
 
-    if self.vx ~= 0 then
-        self.current_animation = self.animations.run
-    else 
+    if self.state == states.IDLE then
         self.current_animation = self.animations.idle
+    elseif self.state == states.RUN then
+        self.current_animation = self.animations.run
     end
 
     if self.y > 500 then

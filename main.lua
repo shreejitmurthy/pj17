@@ -83,18 +83,18 @@ function love.draw()
     local player = state:getActor("player")
     love.graphics.setColor(1, 1, 1)
 
-    -- cam:attach()
+    cam:attach()
         love.graphics.setColor(0.3, 0.3, 0.3)
         love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         love.graphics.setColor(1, 1, 1)
         state:draw()
         -- world:draw(0.5)
-    -- cam:detach()
-    draw_map()
+        draw_map()
+    cam:detach()
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
-    love.graphics.print(tostring(player.grounded), 10, 30)
+    love.graphics.print(tostring(player.state), 10, 30)
 end
 
 function love.keypressed(key)
