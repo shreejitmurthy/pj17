@@ -1,3 +1,7 @@
 .vscode/
 lib/windfield/.DS_Store
 res/.DS_Store
+res/images/.DS_Store
+.gitignore
+res/images/tiles/.DS_Store
+.gitignore
