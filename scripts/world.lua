@@ -67,5 +67,6 @@ function initMap()
 end
 
 function drawMap()
+    gameMap:drawLayer(gameMap.layers["Background"])
     gameMap:drawLayer(gameMap.layers["Stone"])
 end
