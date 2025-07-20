@@ -28,26 +28,29 @@ Spritesheet.__index = Spritesheet
 local Animation = {}
 Animation.__index = Animation
 
-function Animation.new(frames, delay)
+function Animation.new(frames, delay, left, top, loop)
     return setmetatable({
         frames = frames,
         delay = delay,
+        top = top or 0,
+        left = left or 0,
+        flipv = 1,
+        r = 0,
         currentTime = 0,
-        currentIndex = 1
+        currentIndex = 1,
+        loop = loop or true,
     }, Animation)
 end
 
 ---@param spritesheet_path string
 ---@param frameWidth integer
 ---@param frameHeight integer
-function newSpritesheet(spritesheet_path, frameWidth, frameHeight, left, top)
+function newSpritesheet(spritesheet_path, frameWidth, frameHeight)
     local self = setmetatable({}, Spritesheet)
     self.path = spritesheet_path
     self.image = love.graphics.newImage(self.path)
     self.frameWidth = frameWidth
     self.frameHeight = frameHeight
-    self.left = left or 0
-    self.top = top or 0
     return self
 end
 
@@ -56,8 +59,8 @@ function Spritesheet:getFrames(sx, sy, fx, fy)
     for y = sy, fy do
         for x = sx, fx do
             local quad = love.graphics.newQuad(
-                ((x - 1) * self.frameWidth) + self.left,
-                ((y - 1) * self.frameHeight) + self.top,
+                ((x - 1) * self.frameWidth),
+                ((y - 1) * self.frameHeight),
                 self.frameWidth,
                 self.frameHeight,
                 self.image:getDimensions()
@@ -69,7 +72,7 @@ function Spritesheet:getFrames(sx, sy, fx, fy)
     return frames
 end
 
-function Spritesheet:newAnimation(s, f, delay)
+function Spritesheet:newAnimation(s, f, delay, left, top, loop)
     if not delay then
         error("No delay value given to animation (" .. self.path .. ")")
     end
@@ -77,7 +80,7 @@ function Spritesheet:newAnimation(s, f, delay)
     local fx, fy = unpack(f)
     local frames = self:getFrames(sy, sx, fy, fx)
 
-    return Animation.new(frames, delay)
+    return Animation.new(frames, delay, left, top, loop)
 end
 
 function Animation:update(dt)
@@ -91,10 +94,20 @@ function Animation:update(dt)
     end
 end
 
+function Animation:flipV(n)
+    self.flipv = n
+end
+
+function Animation:rotate(r)
+    self.r = r
+end
+
 function Spritesheet:draw(animation, x, y, debug)
+    local quad = animation.frames[animation.currentIndex]
+    ox, oy = self.frameHeight / 2, self.frameHeight / 2
     love.graphics.push()
-    love.graphics.translate(-(self.frameWidth / 2), -(self.frameHeight / 2))
-    love.graphics.draw(self.image, animation.frames[animation.currentIndex], x, y, nil, nil)
+    love.graphics.translate(animation.left, -animation.top)
+    love.graphics.draw(self.image, quad, x, y, self.r, animation.flipv, 1, ox, oy)
     if debug then
         love.graphics.rectangle("line", x, y, self.frameWidth, self.frameHeight)
         love.graphics.print(tostring(animation.currentIndex), x + self.frameWidth + 3, y)
