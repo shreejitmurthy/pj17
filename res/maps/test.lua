@@ -9,7 +9,7 @@ return {
   height = 16,
   tilewidth = 8,
   tileheight = 8,
-  nextlayerid = 5,
+  nextlayerid = 6,
   nextobjectid = 3,
   properties = {},
   tilesets = {
@@ -44,6 +44,22 @@ return {
     }
   },
   layers = {
+    {
+      type = "imagelayer",
+      image = "../images/InertiaCavernBackgroundGameJam.png",
+      id = 5,
+      name = "Background",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = -88,
+      offsety = -88,
+      parallaxx = 1,
+      parallaxy = 1,
+      repeatx = false,
+      repeaty = false,
+      properties = {}
+    },
     {
       type = "tilelayer",
       x = 0,

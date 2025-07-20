@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="8" tileheight="8" infinite="0" nextlayerid="5" nextobjectid="3">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="8" tileheight="8" infinite="0" nextlayerid="6" nextobjectid="3">
  <editorsettings>
   <export target="test.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" name="Stone" tilewidth="8" tileheight="8" tilecount="90" columns="15">
   <image source="../images/tiles/NewStoneAutoGameJam.png" width="120" height="48"/>
  </tileset>
+ <imagelayer id="5" name="Background" offsetx="-88" offsety="-64">
+  <image source="../images/InertiaCavernBackgroundGameJam.png" width="320" height="192"/>
+ </imagelayer>
  <layer id="1" name="Stone" width="16" height="16">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
