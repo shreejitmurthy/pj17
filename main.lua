@@ -59,9 +59,11 @@ function love.load()
 
     state:init(player:init())
 
-    cam = camera(nil, nil, 3)
+    cam = camera(nil, nil, 4)
     local player = state:getActor("player")
     cam_x, cam_y = player.x, player.y
+
+    init_map()
 end
 
 function love.update(dt)
@@ -80,13 +82,16 @@ function love.draw()
     love.graphics.setBackgroundColor(0.5, 0.5, 0.5)
     local player = state:getActor("player")
     love.graphics.setColor(1, 1, 1)
-    cam:attach()
+
+    -- cam:attach()
         love.graphics.setColor(0.3, 0.3, 0.3)
         love.graphics.rectangle('fill', platform.x, platform.y, platform.width, platform.height)
         love.graphics.setColor(1, 1, 1)
         state:draw()
         -- world:draw(0.5)
-    cam:detach()
+    -- cam:detach()
+    draw_map()
+
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
     love.graphics.print(tostring(player.grounded), 10, 30)
