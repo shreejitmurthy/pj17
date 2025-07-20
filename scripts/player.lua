@@ -39,7 +39,7 @@ function player:init()
 
     p.animations = {}
     p.spritesheet1 = newSpritesheet("res/images/player/atlas.png", 16, 16, 0, 0)
-    p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.2)
+    p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.3)
     p.animations.run = p.spritesheet1:newAnimation({1, 1}, {1, 4}, 0.1)
     p.current_animation = p.animations.idle
 
@@ -95,8 +95,8 @@ function player:update(dt)
         self.current_animation = self.animations.run
     end
 
-    if self.y > 500 then
-        self.collider:setPosition((_G.confw.width / 2), (_G.confw.height / 2))
+    if self.y > map_height then
+        self.collider:setPosition(50, 10)
     end
 
     self.current_animation:flipV(self.dir)
