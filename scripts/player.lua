@@ -13,7 +13,6 @@ function player:init()
     local p = actor.new(self, 50, 10, "player")
     setmetatable(p, {__index = player})
     p.img = love.graphics.newImage("res/images/dude.png")
-    -- p.img:setFilter("nearest", "nearest")
 
     p.maxSpeed = 100
     p.acceleration = 850
@@ -31,9 +30,16 @@ function player:init()
     p.collider = world:newBSGRectangleCollider(p.x, p.y, 12, 16, 3)
     p.collider:setFixedRotation(true)
     p.collider:setCollisionClass("Player")
+    
     p.grounded = false
 
     p.dir = 1
+
+    p.eye_y = 9   -- 9 pixels from top of frame
+    p.eye_x = 11  -- 11 pixels from the left of frame
+    p.eye = {}
+    p.fovn = 60
+    p.length = 85
 
     p.state = states.IDLE
 
@@ -99,6 +105,8 @@ function player:update(dt)
         self.collider:setPosition(50, 10)
     end
 
+    self.eye = {self.x + (self.eye_x / 2) * self.dir, self.y + 1 --[[ +1 to account for idle anim --]]}
+
     self.current_animation:flipV(self.dir)
     self.current_animation:update(dt)
 end
@@ -107,10 +115,54 @@ function player:keypressed(key)
     if (key == "space") and self.grounded then
         self.collider:applyLinearImpulse(0, -self.jumpForce)
     end
+
+    if key == 'up' then
+        self.fovn = self.fovn + 5
+    elseif key == 'down' then
+        self.fovn = self.fovn - 5
+    end
+end
+
+function player:debugVisionCone(segments, fill)
+    segments = segments or 20  -- Number of segments to smooth the cone
+    fill = fill or false
+
+    local points = self.eye  -- Start at the player's eye
+    local startAngle = (self.dir == -1 and math.pi or 0) - math.rad(self.fovn) / 2
+    local angleStep = math.rad(self.fovn) / segments
+
+    for i = 0, segments do
+        local angle = startAngle + i * angleStep
+        local px = points[1] + math.cos(angle) * self.length
+        local py = points[2] + math.sin(angle) * self.length
+        table.insert(points, px)
+        table.insert(points, py)
+    end
+
+    if fill then
+        love.graphics.setColor(1, 1, 0, 0.3) -- yellowish translucent
+        love.graphics.polygon("fill", points)
+    end
+
+    love.graphics.setColor(1, 1, 0, 0.6)
+    love.graphics.polygon("line", points)
+
+    love.graphics.setColor(1, 1, 1, 1) -- reset color
 end
 
 local py_offset = 0.5
 
-function player:draw()
+function player:draw(alpha)
+    love.graphics.setColor(1, 1, 1, alpha)
     self.spritesheet1:draw(self.current_animation, self.x, self.y + py_offset)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function player:debug()
+    love.graphics.setColor(1, 1, 0)
+    love.graphics.circle("fill", self.eye[1], self.eye[2], 0.5)
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.circle("fill", self.x, self.y, 1)
+
+    self:debugVisionCone()
 end
