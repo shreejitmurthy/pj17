@@ -10,7 +10,7 @@ player = {}
 setmetatable(player, {__index = actor})
 
 function player:init()
-    local p = actor.new(self, (_G.confw.width / 2), (_G.confw.height / 2), "player")
+    local p = actor.new(self, 50, 10, "player")
     setmetatable(p, {__index = player})
     p.img = love.graphics.newImage("res/images/dude.png")
     -- p.img:setFilter("nearest", "nearest")
@@ -27,6 +27,7 @@ function player:init()
     }
 
     p.vx = 0
+    p.vy = 0
     p.collider = world:newBSGRectangleCollider(p.x, p.y, 12, 16, 3)
     p.collider:setFixedRotation(true)
     p.collider:setCollisionClass("Player")
@@ -44,7 +45,7 @@ function player:init()
 end
 
 function player:update(dt)
-    local vx, vy = self.collider:getLinearVelocity()
+    local _, vy = self.collider:getLinearVelocity()
     local desiredVX = 0
 
     if love.keyboard.isDown(self.controls.right) then
@@ -72,13 +73,24 @@ function player:update(dt)
         end
     end
 
-    self.collider:setLinearVelocity(self.vx, vy)
+    self.vy = vy
+    self.collider:setLinearVelocity(self.vx, self.vy)
     self.x, self.y = self.collider:getX(), self.collider:getY()
 
     if self.collider:enter('Ground') then
         self.grounded = true
     elseif self.collider:exit('Ground') then
         self.grounded = false
+    end
+
+    if self.vx ~= 0 then
+        self.current_animation = self.animations.run
+    else 
+        self.current_animation = self.animations.idle
+    end
+
+    if self.y > 500 then
+        self.collider:setPosition((_G.confw.width / 2), (_G.confw.height / 2))
     end
 
     self.current_animation:flipV(self.dir)
@@ -91,7 +103,8 @@ function player:keypressed(key)
     end
 end
 
+local py_offset = 0.5
 
 function player:draw()
-    self.spritesheet1:draw(self.current_animation, self.x, self.y + 0.5)
+    self.spritesheet1:draw(self.current_animation, self.x, self.y + py_offset)
 end
