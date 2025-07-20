@@ -15,10 +15,10 @@ function player:init()
     p.img = love.graphics.newImage("res/images/dude.png")
     -- p.img:setFilter("nearest", "nearest")
 
-    p.maxSpeed = 150
+    p.maxSpeed = 100
     p.acceleration = 850
     p.deceleration = 1000
-    p.jumpForce = 75
+    p.jumpForce = 50
 
     p.controls = {
         left = {"a", "left"},
