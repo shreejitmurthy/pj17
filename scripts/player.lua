@@ -1,3 +1,11 @@
+require "lib.spritesheet"
+
+states = {
+    IDLE = 0,
+    RUN = 1,
+    JUMP = 2,
+}
+
 player = {}
 setmetatable(player, {__index = actor})
 
@@ -5,7 +13,7 @@ function player:init()
     local p = actor.new(self, (_G.confw.width / 2), (_G.confw.height / 2), "player")
     setmetatable(p, {__index = player})
     p.img = love.graphics.newImage("res/images/dude.png")
-    p.img:setFilter("nearest", "nearest")
+    -- p.img:setFilter("nearest", "nearest")
 
     p.maxSpeed = 150
     p.acceleration = 850
@@ -25,6 +33,12 @@ function player:init()
     p.grounded = false
 
     p.dir = 1
+
+    p.animations = {}
+    p.spritesheet1 = newSpritesheet("res/images/player/atlas.png", 16, 16, 0, 0)
+    p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.2)
+    p.animations.run = p.spritesheet1:newAnimation({1, 1}, {1, 4}, 0.1)
+    p.current_animation = p.animations.idle
 
     return p
 end
@@ -66,6 +80,9 @@ function player:update(dt)
     elseif self.collider:exit('Ground') then
         self.grounded = false
     end
+
+    self.current_animation:flipV(self.dir)
+    self.current_animation:update(dt)
 end
 
 function player:keypressed(key)
@@ -76,5 +93,5 @@ end
 
 
 function player:draw()
-    love.graphics.draw(self.img, self.x, self.y, 0, self.dir, 1, 7, 8)
+    self.spritesheet1:draw(self.current_animation, self.x, self.y + 0.5)
 end
