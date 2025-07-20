@@ -1,0 +1,64 @@
+{
+    "software": {
+        "name": "rTexPacker v5.0",
+        "url": "https://www.raylibtech.com/rtexpacker"
+    },
+    "atlas": {
+        "imagePath": "atlas.png",
+        "width": 128,
+        "height": 128,
+        "spriteCount": 4,
+        "isFont": false,
+        "fontSize": 32
+    },
+    "sprites": [
+        {
+            "nameId": "jump",
+            "tag": "",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 0, "y": 16 },
+            "sourceSize": { "width": 16, "height": 16 },
+            "padding": 0,
+            "trimmed": false,
+            "trimRec": { "x": 2, "y": 0, "width": 12, "height": 16 },
+            "colliderType": 0,
+            "colliderInfo": { "x": 0, "y": 0, "sizeX": 0, "sizeY": 0 }
+        },
+        {
+            "nameId": "idle",
+            "tag": "",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 64, "y": 0 },
+            "sourceSize": { "width": 32, "height": 16 },
+            "padding": 0,
+            "trimmed": false,
+            "trimRec": { "x": 2, "y": 0, "width": 28, "height": 16 },
+            "colliderType": 0,
+            "colliderInfo": { "x": 0, "y": 0, "sizeX": 0, "sizeY": 0 }
+        },
+        {
+            "nameId": "idle_closed",
+            "tag": "",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 96, "y": 0 },
+            "sourceSize": { "width": 32, "height": 16 },
+            "padding": 0,
+            "trimmed": false,
+            "trimRec": { "x": 2, "y": 0, "width": 28, "height": 16 },
+            "colliderType": 0,
+            "colliderInfo": { "x": 0, "y": 0, "sizeX": 0, "sizeY": 0 }
+        },
+        {
+            "nameId": "run",
+            "tag": "",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 0, "y": 0 },
+            "sourceSize": { "width": 64, "height": 16 },
+            "padding": 0,
+            "trimmed": false,
+            "trimRec": { "x": 2, "y": 0, "width": 61, "height": 16 },
+            "colliderType": 0,
+            "colliderInfo": { "x": 0, "y": 0, "sizeX": 0, "sizeY": 0 }
+        }
+    ]
+}
