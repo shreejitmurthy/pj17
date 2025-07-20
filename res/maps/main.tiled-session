@@ -7,10 +7,23 @@
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "NewStoneAutoGameJam.tsx": {
+            "scaleInEditor": 1
+        }
     },
+    "last.imagePath": "/Users/shree/dev/lua/pj17/res/images/tiles",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 8,
+    "map.tileWidth": 8,
     "openFiles": [
     ],
     "project": "main.tiled-project",
     "recentFiles": [
-    ]
+        "NewStoneAutoGameJam.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 8,
+        "width": 8
+    }
 }
