@@ -191,9 +191,8 @@ function player:getDirVec(dt)
         targetAngle = targetAngle + math.pi * 2
     end
 
-    -- Clamp target angle based on facing direction
     if self.dir == 1 then
-        -- Right-facing: allow [270° → 360°] and [0° → 90°]
+        -- right-facing: allow [270° --> 360°] and [0° --> 90°]
         if targetAngle > math.rad(90) and targetAngle < math.rad(270) then
             if targetAngle < math.pi then
                 targetAngle = math.rad(90)
@@ -202,7 +201,7 @@ function player:getDirVec(dt)
             end
         end
     else
-        -- Left-facing: clamp to [90°, 270°]
+        -- left-facing: clamp to [90°, 270°]
         targetAngle = math.max(math.rad(90), math.min(math.rad(270), targetAngle))
     end
     self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
