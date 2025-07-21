@@ -38,8 +38,10 @@ function player:init()
     p.eye_y = 9   -- 9 pixels from top of frame
     p.eye_x = 11  -- 11 pixels from the left of frame
     p.eye = {}
-    p.fovn = 60
+    p.fovn = 45
     p.length = 85
+    p.visionAngle = 0
+    p.coneTurnSpeed = 15
 
     p.state = states.IDLE
 
@@ -105,7 +107,10 @@ function player:update(dt)
         self.collider:setPosition(50, 10)
     end
 
-    self.eye = {self.x + (self.eye_x / 2) * self.dir, self.y + 1 --[[ +1 to account for idle anim --]]}
+    self.eye = {
+        self.x + (self.eye_x / 2 - 2.75 --[[ -2.75 to bring into image --]]) * self.dir, 
+        self.y + 1 --[[ +1 to account for idle anim --]]
+    }
 
     self.current_animation:flipV(self.dir)
     self.current_animation:update(dt)
@@ -165,4 +170,50 @@ function player:debug()
     love.graphics.circle("fill", self.x, self.y, 1)
 
     self:debugVisionCone()
+end
+
+function player:getWorldPos()
+    local cx, cy = cam_x, cam_y
+    local sw, sh = love.graphics.getDimensions()
+    local ex, ey = self.eye[1], self.eye[2]
+    local sx = (ex - cx) * cam_zoom + sw / 2
+    local sy = (ey - cy) * cam_zoom + sh / 2
+    return {sx, sy}
+end
+
+function player:getDirVec(dt)
+    local mx, my = cam:mousePosition()
+    local px, py = self.eye[1], self.eye[2]
+    local dx, dy = mx - px, my - py
+
+    local targetAngle = math.atan2(dy, dx)
+    if targetAngle < 0 then
+        targetAngle = targetAngle + math.pi * 2
+    end
+
+    -- Clamp target angle based on facing direction
+    if self.dir == 1 then
+        -- Right-facing: allow [270° → 360°] and [0° → 90°]
+        if targetAngle > math.rad(90) and targetAngle < math.rad(270) then
+            if targetAngle < math.pi then
+                targetAngle = math.rad(90)
+            else
+                targetAngle = math.rad(270)
+            end
+        end
+    else
+        -- Left-facing: clamp to [90°, 270°]
+        targetAngle = math.max(math.rad(90), math.min(math.rad(270), targetAngle))
+    end
+    self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
+
+    return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
+end
+
+function player:getConeAngle()
+    return math.rad(self.fovn)
+end
+
+function player:getConeLength()
+    return self.length * cam_zoom
 end
