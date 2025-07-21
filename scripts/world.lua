@@ -70,3 +70,17 @@ function drawMap()
     gameMap:drawLayer(gameMap.layers["Background"])
     gameMap:drawLayer(gameMap.layers["Stone"])
 end
+
+function drawScene(canvas, shader, func)
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear()
+    cam:attach()
+        func()
+    cam:detach()
+    love.graphics.setCanvas()
+
+    love.graphics.setShader(shader)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(canvas, 0, 0)
+    love.graphics.setShader()
+end
