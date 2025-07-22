@@ -3,7 +3,8 @@ require "lib.spritesheet"
 states = {
     IDLE = 0,
     RUN = 1,
-    JUMP = 2,
+    BACKRUN = 2,
+    JUMP = 3,
 }
 
 player = {}
@@ -33,6 +34,8 @@ function player:init()
     
     p.grounded = false
 
+    p.reverse_running = false
+
     p.dir = 1
 
     p.eye_y = 9   -- 9 pixels from top of frame
@@ -46,9 +49,11 @@ function player:init()
     p.state = states.IDLE
 
     p.animations = {}
-    p.spritesheet1 = newSpritesheet("res/images/player/atlas.png", 16, 16, 0, 0)
+    p.spritesheet1 = newSpritesheet("res/images/player/atlas.png", 16, 16)
     p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.3)
+    p.animations.idle_closed = p.spritesheet1:newAnimation({1, 7}, {1, 8}, 0.3)
     p.animations.run = p.spritesheet1:newAnimation({1, 1}, {1, 4}, 0.1)
+    p.animations.run_reverse = p.spritesheet1:newAnimation({2, 1}, {2, 4}, 0.2)
     p.current_animation = p.animations.idle
 
     return p
@@ -58,14 +63,25 @@ function player:update(dt)
     local _, vy = self.collider:getLinearVelocity()
     local desiredVX = 0
 
+    local visionDir = self:getVisionDir()
+    local inputDir = 0
+
     if love.keyboard.isDown(self.controls.right) then
-        desiredVX = self.maxSpeed
-        self.dir = 1
-        self.state = states.RUN
+        inputDir = 1
     elseif love.keyboard.isDown(self.controls.left) then
-        desiredVX = -self.maxSpeed
-        self.dir = -1
-        self.state = states.RUN
+        inputDir = -1
+    end
+
+    if inputDir ~= 0 then
+        self.dir = inputDir
+
+        if inputDir ~= visionDir then
+            desiredVX = self.maxSpeed * 0.5 * inputDir
+            self.state = states.BACKRUN
+        else
+            desiredVX = self.maxSpeed * inputDir
+            self.state = states.RUN
+        end
     else
         self.state = states.IDLE
     end
@@ -101,14 +117,18 @@ function player:update(dt)
         self.current_animation = self.animations.idle
     elseif self.state == states.RUN then
         self.current_animation = self.animations.run
+    elseif self.state == states.BACKRUN then
+        self.current_animation = self.animations.run_reverse
     end
 
     if self.y > map_height then
         self.collider:setPosition(50, 10)
     end
 
+    local dir = self.dir == visionDir and self.dir or visionDir
+
     self.eye = {
-        self.x + (self.eye_x / 2 - 2.75 --[[ -2.75 to bring into image --]]) * self.dir, 
+        self.x + (self.eye_x / 2 - 2.75 --[[ -2.75 to bring into image --]]) * dir, 
         self.y + 1 --[[ +1 to account for idle anim --]]
     }
 
@@ -128,12 +148,17 @@ function player:keypressed(key)
     end
 end
 
+function player:getVisionDir()
+    local angle = self.visionAngle % (2 * math.pi)
+    return (angle > math.pi / 2 and angle < 3 * math.pi / 2) and -1 or 1
+end
+
 function player:debugVisionCone(segments, fill)
-    segments = segments or 20  -- Number of segments to smooth the cone
+    segments = segments or 20
     fill = fill or false
 
-    local points = self.eye  -- Start at the player's eye
-    local startAngle = (self.dir == -1 and math.pi or 0) - math.rad(self.fovn) / 2
+    local points = self.eye
+    local startAngle = self.visionAngle - math.rad(self.fovn) / 2
     local angleStep = math.rad(self.fovn) / segments
 
     for i = 0, segments do
@@ -145,14 +170,14 @@ function player:debugVisionCone(segments, fill)
     end
 
     if fill then
-        love.graphics.setColor(1, 1, 0, 0.3) -- yellowish translucent
+        love.graphics.setColor(1, 1, 0, 0.3)  -- yellowish translucent
         love.graphics.polygon("fill", points)
     end
 
     love.graphics.setColor(1, 1, 0, 0.6)
     love.graphics.polygon("line", points)
 
-    love.graphics.setColor(1, 1, 1, 1) -- reset color
+    love.graphics.setColor(1, 1, 1, 1)  -- reset color
 end
 
 local py_offset = 0.5
@@ -181,33 +206,29 @@ function player:getWorldPos()
     return {sx, sy}
 end
 
+-- 'deadzones'
+local rightEntry = math.rad(80)    -- below this, 100% right
+local rightExit  = math.rad(280)   -- above this, 100% right
+local leftEntry  = math.rad(100)   -- above this, 100% left
+local leftExit   = math.rad(260)   -- below this, 100% left
+
 function player:getDirVec(dt)
     local mx, my = cam:mousePosition()
     local px, py = self.eye[1], self.eye[2]
-    local dx, dy = mx - px, my - py
+    local targetAngle = math.atan2(my - py, mx - px)
+    if targetAngle < 0 then targetAngle = targetAngle + 2*math.pi end
 
-    local targetAngle = math.atan2(dy, dx)
-    if targetAngle < 0 then
-        targetAngle = targetAngle + math.pi * 2
+    -- hysteresis: only flip when clearly in one hemisphere
+    if targetAngle > leftEntry  and targetAngle < leftExit then
+        self.dir = -1
+    elseif targetAngle < rightEntry or targetAngle > rightExit then
+        self.dir = 1
     end
 
-    if self.dir == 1 then
-        -- right-facing: allow [270° --> 360°] and [0° --> 90°]
-        if targetAngle > math.rad(90) and targetAngle < math.rad(270) then
-            if targetAngle < math.pi then
-                targetAngle = math.rad(90)
-            else
-                targetAngle = math.rad(270)
-            end
-        end
-    else
-        -- left-facing: clamp to [90°, 270°]
-        targetAngle = math.max(math.rad(90), math.min(math.rad(270), targetAngle))
-    end
     self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
-
     return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
 end
+
 
 function player:getConeAngle()
     return math.rad(self.fovn)
