@@ -45,6 +45,7 @@ function player:init()
     p.length = 85
     p.visionAngle = 0
     p.coneTurnSpeed = 15
+    p.visionDir = 1
 
     p.state = states.IDLE
 
@@ -63,7 +64,7 @@ function player:update(dt)
     local _, vy = self.collider:getLinearVelocity()
     local desiredVX = 0
 
-    local visionDir = self:getVisionDir()
+    self.visionDir = self:getVisionDir()
     local inputDir = 0
 
     if love.keyboard.isDown(self.controls.right) then
@@ -75,7 +76,7 @@ function player:update(dt)
     if inputDir ~= 0 then
         self.dir = inputDir
 
-        if inputDir ~= visionDir then
+        if inputDir ~= self.visionDir then
             desiredVX = self.maxSpeed * 0.5 * inputDir
             self.state = states.BACKRUN
         else
@@ -125,10 +126,10 @@ function player:update(dt)
         self.collider:setPosition(50, 10)
     end
 
-    local dir = self.dir == visionDir and self.dir or visionDir
-
+    -- local dir = self.dir == self.visionDir and self.dir or self.visionDir
+    local eyeOffsetDir = self.visionDir or 1
     self.eye = {
-        self.x + (self.eye_x / 2 - 2.75 --[[ -2.75 to bring into image --]]) * dir, 
+        self.x + (self.eye_x / 2 - 2.75 --[[ -2.75 to bring into image --]]) * eyeOffsetDir, 
         self.y + 1 --[[ +1 to account for idle anim --]]
     }
 
@@ -212,22 +213,47 @@ local rightExit  = math.rad(280)   -- above this, 100% right
 local leftEntry  = math.rad(100)   -- above this, 100% left
 local leftExit   = math.rad(260)   -- below this, 100% left
 
+-- function player:getDirVec(dt)
+--     local mx, my = cam:mousePosition()
+--     local px, py = self.eye[1], self.eye[2]
+--     local targetAngle = math.atan2(my - py, mx - px)
+--     if targetAngle < 0 then targetAngle = targetAngle + 2*math.pi end
+
+--     -- hysteresis: only flip when clearly in one hemisphere
+--     if targetAngle > leftEntry and targetAngle < leftExit then
+--         self.dir = -1
+--     elseif targetAngle < rightEntry or targetAngle > rightExit then
+--         self.dir = 1
+--     end
+
+--     self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
+--     return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
+-- end
+
 function player:getDirVec(dt)
     local mx, my = cam:mousePosition()
     local px, py = self.eye[1], self.eye[2]
+
+    -- 1) smooth your cone towards the true target
     local targetAngle = math.atan2(my - py, mx - px)
     if targetAngle < 0 then targetAngle = targetAngle + 2*math.pi end
+    self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
 
-    -- hysteresis: only flip when clearly in one hemisphere
-    if targetAngle > leftEntry  and targetAngle < leftExit then
-        self.dir = -1
-    elseif targetAngle < rightEntry or targetAngle > rightExit then
-        self.dir = 1
+    -- 2) hysteresis in *pixel* space around true mouse-x
+    --    we only flip if the mouse is more than THRESH pixels off-center
+    local dx = mx - px
+    local THRESH = 15
+    if     dx >=  THRESH then self.visionDir =  1
+    elseif dx <= -THRESH then self.visionDir = -1
     end
 
-    self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
+    -- 3) (optionally) keep your sprite flip separate:
+    --    if you *do* want your character to turn with the cone, uncomment:
+       self.dir = self.visionDir
+
     return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
 end
+
 
 
 function player:getConeAngle()
