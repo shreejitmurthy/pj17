@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="8" tileheight="8" infinite="0" nextlayerid="6" nextobjectid="3">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="6">
  <editorsettings>
   <export target="test.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" name="Stone" tilewidth="8" tileheight="8" tilecount="90" columns="15">
   <image source="../images/tiles/NewStoneAutoGameJam.png" width="120" height="48"/>
  </tileset>
+ <tileset firstgid="91" name="Dirt" tilewidth="8" tileheight="8" tilecount="90" columns="15">
+  <image source="../images/tiles/NewDirtAutoGameJam.png" width="120" height="48"/>
+ </tileset>
  <imagelayer id="5" name="Background" offsetx="-88" offsety="-64">
   <image source="../images/InertiaCavernBackgroundGameJam.png" width="320" height="192"/>
  </imagelayer>
- <layer id="1" name="Stone" width="16" height="16">
+ <layer id="1" name="Platform" width="16" height="16">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,10,11,12,13,14,11,12,13,14,15,0,0,0,
+0,0,0,10,11,12,13,14,11,102,103,104,15,0,0,0,
 0,0,0,25,26,27,28,29,26,27,28,29,30,0,0,0,
 0,0,0,40,41,43,43,44,41,42,43,44,45,0,0,0,
 0,0,0,55,41,41,41,41,41,42,43,44,60,0,0,0,
@@ -31,5 +34,8 @@
  </layer>
  <objectgroup id="4" name="Ground">
   <object id="2" x="24" y="32" width="80" height="64"/>
+ </objectgroup>
+ <objectgroup id="6" name="Lookies">
+  <object id="4" x="72" y="32" width="24" height="8"/>
  </objectgroup>
 </map>

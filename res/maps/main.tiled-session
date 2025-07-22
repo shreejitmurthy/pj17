@@ -7,6 +7,9 @@
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "test.tmx": {
             "scale": 3.9883,
             "selectedLayer": 1,
@@ -14,6 +17,9 @@
                 "x": 84.99862096632651,
                 "y": 58.170147681969766
             }
+        },
+        "test.tmx#NewDirtAutoGameJam": {
+            "scaleInEditor": 1
         },
         "test.tmx#Stone": {
             "scaleInDock": 2.6739

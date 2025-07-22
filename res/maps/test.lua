@@ -9,8 +9,8 @@ return {
   height = 16,
   tilewidth = 8,
   tileheight = 8,
-  nextlayerid = 6,
-  nextobjectid = 3,
+  nextlayerid = 7,
+  nextobjectid = 6,
   properties = {},
   tilesets = {
     {
@@ -41,6 +41,35 @@ return {
       wangsets = {},
       tilecount = 90,
       tiles = {}
+    },
+    {
+      name = "Dirt",
+      firstgid = 91,
+      class = "",
+      tilewidth = 8,
+      tileheight = 8,
+      spacing = 0,
+      margin = 0,
+      columns = 15,
+      image = "../images/tiles/NewDirtAutoGameJam.png",
+      imagewidth = 120,
+      imageheight = 48,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 8,
+        height = 8
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 90,
+      tiles = {}
     }
   },
   layers = {
@@ -53,7 +82,7 @@ return {
       visible = true,
       opacity = 1,
       offsetx = -88,
-      offsety = -88,
+      offsety = -64,
       parallaxx = 1,
       parallaxy = 1,
       repeatx = false,
@@ -67,7 +96,7 @@ return {
       width = 16,
       height = 16,
       id = 1,
-      name = "Stone",
+      name = "Platform",
       class = "",
       visible = true,
       opacity = 1,
@@ -82,7 +111,7 @@ return {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 10, 11, 12, 13, 14, 11, 12, 13, 14, 15, 0, 0, 0,
+        0, 0, 0, 10, 11, 12, 13, 14, 11, 102, 103, 104, 15, 0, 0, 0,
         0, 0, 0, 25, 26, 27, 28, 29, 26, 27, 28, 29, 30, 0, 0, 0,
         0, 0, 0, 40, 41, 43, 43, 44, 41, 42, 43, 44, 45, 0, 0, 0,
         0, 0, 0, 55, 41, 41, 41, 41, 41, 42, 43, 44, 60, 0, 0, 0,
@@ -119,6 +148,35 @@ return {
           y = 32,
           width = 80,
           height = 64,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 6,
+      name = "Lookies",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 4,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 72,
+          y = 32,
+          width = 24,
+          height = 8,
           rotation = 0,
           visible = true,
           properties = {}
