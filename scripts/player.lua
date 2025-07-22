@@ -207,12 +207,6 @@ function player:getWorldPos()
     return {sx, sy}
 end
 
--- 'deadzones'
-local rightEntry = math.rad(80)    -- below this, 100% right
-local rightExit  = math.rad(280)   -- above this, 100% right
-local leftEntry  = math.rad(100)   -- above this, 100% left
-local leftExit   = math.rad(260)   -- below this, 100% left
-
 -- function player:getDirVec(dt)
 --     local mx, my = cam:mousePosition()
 --     local px, py = self.eye[1], self.eye[2]
@@ -230,30 +224,30 @@ local leftExit   = math.rad(260)   -- below this, 100% left
 --     return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
 -- end
 
+-- above your code, once:
+local COS_RIGHT  = math.cos(math.rad(80))   -- ~+0.1736
+local COS_LEFT   = math.cos(math.rad(100))  -- ~–0.1736
+
 function player:getDirVec(dt)
+    local visionVec
     local mx, my = cam:mousePosition()
-    local px, py = self.eye[1], self.eye[2]
+    local px, py = self.x, self.y
 
-    -- 1) smooth your cone towards the true target
-    local targetAngle = math.atan2(my - py, mx - px)
-    if targetAngle < 0 then targetAngle = targetAngle + 2*math.pi end
-    self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
+    local rawA = math.atan2(my - py, mx - px)
+    if rawA < 0 then rawA = rawA + 2*math.pi end
 
-    -- 2) hysteresis in *pixel* space around true mouse-x
-    --    we only flip if the mouse is more than THRESH pixels off-center
-    local dx = mx - px
-    local THRESH = 15
-    if     dx >=  THRESH then self.visionDir =  1
-    elseif dx <= -THRESH then self.visionDir = -1
+    self.visionAngle = lerpAngle(self.visionAngle, rawA, self.coneTurnSpeed * dt)
+
+    local c = math.cos(rawA)
+    if     c >  COS_RIGHT then self.visionDir =  1
+    elseif c <  COS_LEFT  then self.visionDir = -1
     end
 
-    -- 3) (optionally) keep your sprite flip separate:
-    --    if you *do* want your character to turn with the cone, uncomment:
-       self.dir = self.visionDir
+    self.dir = self.visionDir
 
-    return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
+    visionVec = { math.cos(self.visionAngle), math.sin(self.visionAngle) }
+    return visionVec
 end
-
 
 
 function player:getConeAngle()
