@@ -18,7 +18,7 @@ function player:init()
     p.maxSpeed = 75
     p.acceleration = 850
     p.deceleration = 1000
-    p.jumpForce = 50
+    p.jumpForce = 45
 
     p.controls = {
         left = {"a", "left"},
@@ -46,6 +46,7 @@ function player:init()
     p.visionAngle = 0
     p.coneTurnSpeed = 15
     p.visionDir = 1
+    p.detectionScale = 0.3  -- ensure that detecting certain tiles is deliberate and not just caught
 
     p.rays = {}
 
@@ -135,7 +136,7 @@ function player:update(dt)
         self.y + 1 --[[ +1 to account for idle anim --]]
     }
 
-    self.rays = self:shootRays(4)
+    self.rays = self:shootRays(8)
 
     self.current_animation:flipV(self.dir)
     self.current_animation:update(dt)
@@ -147,9 +148,11 @@ function player:keypressed(key)
     end
 
     if key == 'up' then
-        self.fovn = self.fovn + 5
+        -- self.fovn = self.fovn + 5
+        self.detectionScale = self.detectionScale + 0.1
     elseif key == 'down' then
-        self.fovn = self.fovn - 5
+        -- self.fovn = self.fovn - 5
+        self.detectionScale = self.detectionScale - 0.1
     end
 end
 
@@ -185,10 +188,11 @@ function player:debugVisionCone(segments, fill)
     love.graphics.setColor(1, 1, 1, 1)  -- reset color
 end
 
+offset = 0
+
 function player:shootRays(rayCount)
     rayCount = rayCount or 12
 
-    -- recompute eye (if you haven't already)
     local eyeOffsetDir = self.visionDir or 1
     local ex = self.x + (self.eye_x/2 - 2.75) * eyeOffsetDir
     local ey = self.y + 1
@@ -198,7 +202,7 @@ function player:shootRays(rayCount)
     -- subtract the feathered region
     local softness = halfFOV * coneEdgeSoftness
     -- half-angle of the full-opacity core
-    local innerHalf = halfFOV - softness
+    local innerHalf = (halfFOV - softness) * self.detectionScale
 
     -- spread rays inside that core
     local startAngle = self.visionAngle - innerHalf
@@ -239,7 +243,7 @@ function player:debug()
 
     self:debugVisionCone()
     love.graphics.setColor(1, 1, 0, 0.6)
-    self:debugRays(8)
+    self:debugRays()
 end
 
 function player:getWorldPos()
