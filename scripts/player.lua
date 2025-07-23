@@ -156,40 +156,6 @@ function player:keypressed(key)
     end
 end
 
-function player:getVisionDir()
-    local angle = self.visionAngle % (2 * math.pi)
-    return (angle > math.pi / 2 and angle < 3 * math.pi / 2) and -1 or 1
-end
-
-function player:debugVisionCone(segments, fill)
-    segments = segments or 20
-    fill = fill or false
-
-    local points = self.eye
-    local startAngle = self.visionAngle - math.rad(self.fovn) / 2
-    local angleStep = math.rad(self.fovn) / segments
-
-    for i = 0, segments do
-        local angle = startAngle + i * angleStep
-        local px = points[1] + math.cos(angle) * self.length
-        local py = points[2] + math.sin(angle) * self.length
-        table.insert(points, px)
-        table.insert(points, py)
-    end
-
-    if fill then
-        love.graphics.setColor(1, 1, 0, 0.3)  -- yellowish translucent
-        love.graphics.polygon("fill", points)
-    end
-
-    love.graphics.setColor(1, 1, 0, 0.6)
-    love.graphics.polygon("line", points)
-
-    love.graphics.setColor(1, 1, 1, 1)  -- reset color
-end
-
-offset = 0
-
 function player:shootRays(rayCount)
     rayCount = rayCount or 12
 
@@ -219,6 +185,13 @@ function player:shootRays(rayCount)
     return rays
 end
 
+local py_offset = 0.5
+
+function player:draw(alpha)
+    love.graphics.setColor(1, 1, 1, alpha)
+    self.spritesheet1:draw(self.current_animation, self.x, self.y + py_offset)
+    love.graphics.setColor(1, 1, 1, 1)
+end
 
 function player:debugRays()
     for _, v in ipairs(self.rays) do
@@ -227,12 +200,31 @@ function player:debugRays()
     love.graphics.setColor(1, 1, 1, 1)
 end
 
-local py_offset = 0.5
+function player:debugVisionCone(segments, fill)
+    segments = segments or 20
+    fill = fill or false
 
-function player:draw(alpha)
-    love.graphics.setColor(1, 1, 1, alpha)
-    self.spritesheet1:draw(self.current_animation, self.x, self.y + py_offset)
-    love.graphics.setColor(1, 1, 1, 1)
+    local points = self.eye
+    local startAngle = self.visionAngle - math.rad(self.fovn) / 2
+    local angleStep = math.rad(self.fovn) / segments
+
+    for i = 0, segments do
+        local angle = startAngle + i * angleStep
+        local px = points[1] + math.cos(angle) * self.length
+        local py = points[2] + math.sin(angle) * self.length
+        table.insert(points, px)
+        table.insert(points, py)
+    end
+
+    if fill then
+        love.graphics.setColor(1, 1, 0, 0.3)  -- yellowish translucent
+        love.graphics.polygon("fill", points)
+    end
+
+    love.graphics.setColor(1, 1, 0, 0.6)
+    love.graphics.polygon("line", points)
+
+    love.graphics.setColor(1, 1, 1, 1)  -- reset color
 end
 
 function player:debug()
@@ -244,6 +236,11 @@ function player:debug()
     self:debugVisionCone()
     love.graphics.setColor(1, 1, 0, 0.6)
     self:debugRays()
+end
+
+function player:getVisionDir()
+    local angle = self.visionAngle % (2 * math.pi)
+    return (angle > math.pi / 2 and angle < 3 * math.pi / 2) and -1 or 1
 end
 
 function player:getWorldPos()
