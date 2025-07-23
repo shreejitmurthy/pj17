@@ -47,6 +47,8 @@ function player:init()
     p.coneTurnSpeed = 15
     p.visionDir = 1
 
+    p.rays = {}
+
     p.state = states.IDLE
 
     p.animations = {}
@@ -133,6 +135,8 @@ function player:update(dt)
         self.y + 1 --[[ +1 to account for idle anim --]]
     }
 
+    self.rays = self:shootRays(4)
+
     self.current_animation:flipV(self.dir)
     self.current_animation:update(dt)
 end
@@ -181,6 +185,30 @@ function player:debugVisionCone(segments, fill)
     love.graphics.setColor(1, 1, 1, 1)  -- reset color
 end
 
+function player:shootRays(rayCount)
+    local rays = {}
+    rayCount = rayCount or 12
+    local ex, ey = unpack(self.eye)
+    local halfFOV = math.rad(self.fovn) * 0.5
+    local startAngle = self.visionAngle - halfFOV
+    local angleStep  = (halfFOV * 2) / rayCount
+    for i = 0, rayCount do
+        local a = startAngle + i * angleStep
+        local dx = math.cos(a) * self.length
+        local dy = math.sin(a) * self.length
+        -- love.graphics.line(ex, ey, ex + dx, ey + dy)
+        rays[#rays+1] = {ex, ey, ex + dx, ey + dy}
+    end
+    return rays
+end
+
+function player:debugRays()
+    for _, v in ipairs(self.rays) do
+        love.graphics.line(v[1], v[2], v[3], v[4])
+    end
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
 local py_offset = 0.5
 
 function player:draw(alpha)
@@ -196,6 +224,8 @@ function player:debug()
     love.graphics.circle("fill", self.x, self.y, 1)
 
     self:debugVisionCone()
+    love.graphics.setColor(1, 1, 0, 0.6)
+    self:debugRays(8)
 end
 
 function player:getWorldPos()
