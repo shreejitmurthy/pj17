@@ -15,7 +15,7 @@ function player:init()
     setmetatable(p, {__index = player})
     p.img = love.graphics.newImage("res/images/dude.png")
 
-    p.maxSpeed = 100
+    p.maxSpeed = 75
     p.acceleration = 850
     p.deceleration = 1000
     p.jumpForce = 50
@@ -34,7 +34,7 @@ function player:init()
     
     p.grounded = false
 
-    p.reverse_running = false
+    p.backRunModifier = 0.5
 
     p.dir = 1
 
@@ -54,7 +54,7 @@ function player:init()
     p.animations.idle = p.spritesheet1:newAnimation({1, 5}, {1, 6}, 0.3)
     p.animations.idle_closed = p.spritesheet1:newAnimation({1, 7}, {1, 8}, 0.3)
     p.animations.run = p.spritesheet1:newAnimation({1, 1}, {1, 4}, 0.1)
-    p.animations.run_reverse = p.spritesheet1:newAnimation({2, 1}, {2, 4}, 0.2)
+    p.animations.run_reverse = p.spritesheet1:newAnimation({2, 1}, {2, 4}, 0.25)
     p.current_animation = p.animations.idle
 
     return p
@@ -77,7 +77,7 @@ function player:update(dt)
         self.dir = inputDir
 
         if inputDir ~= self.visionDir then
-            desiredVX = self.maxSpeed * 0.5 * inputDir
+            desiredVX = self.maxSpeed * self.backRunModifier * inputDir
             self.state = states.BACKRUN
         else
             desiredVX = self.maxSpeed * inputDir
@@ -207,26 +207,8 @@ function player:getWorldPos()
     return {sx, sy}
 end
 
--- function player:getDirVec(dt)
---     local mx, my = cam:mousePosition()
---     local px, py = self.eye[1], self.eye[2]
---     local targetAngle = math.atan2(my - py, mx - px)
---     if targetAngle < 0 then targetAngle = targetAngle + 2*math.pi end
-
---     -- hysteresis: only flip when clearly in one hemisphere
---     if targetAngle > leftEntry and targetAngle < leftExit then
---         self.dir = -1
---     elseif targetAngle < rightEntry or targetAngle > rightExit then
---         self.dir = 1
---     end
-
---     self.visionAngle = lerpAngle(self.visionAngle, targetAngle, self.coneTurnSpeed * dt)
---     return { math.cos(self.visionAngle), math.sin(self.visionAngle) }
--- end
-
--- above your code, once:
-local COS_RIGHT  = math.cos(math.rad(80))   -- ~+0.1736
-local COS_LEFT   = math.cos(math.rad(100))  -- ~–0.1736
+local COS_RIGHT = math.cos(math.rad(80))   -- ~+0.1736
+local COS_LEFT = math.cos(math.rad(100))   -- ~–0.1736
 
 function player:getDirVec(dt)
     local visionVec
@@ -248,7 +230,6 @@ function player:getDirVec(dt)
     visionVec = { math.cos(self.visionAngle), math.sin(self.visionAngle) }
     return visionVec
 end
-
 
 function player:getConeAngle()
     return math.rad(self.fovn)
