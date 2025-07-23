@@ -23,7 +23,8 @@ function player:init()
     p.controls = {
         left = {"a", "left"},
         right = {"d", "right"},
-        jump = {"space", "up"}
+        jump = {"space", "up"},
+        close = {"lshift"}
     }
 
     p.vx = 0
@@ -49,6 +50,8 @@ function player:init()
     p.detectionScale = 0.3  -- ensure that detecting certain tiles is deliberate and not just caught
 
     p.rays = {}
+
+    p.foundLookie = false
 
     p.state = states.IDLE
 
@@ -137,6 +140,7 @@ function player:update(dt)
     }
 
     self.rays = self:shootRays(8)
+    self:scanVisionCone()
 
     self.current_animation:flipV(self.dir)
     self.current_animation:update(dt)
@@ -185,6 +189,34 @@ function player:shootRays(rayCount)
     return rays
 end
 
+function player:scanVisionCone()
+    self.foundLookie = false
+    for _, ray in ipairs(self.rays) do
+        -- clear old hit
+        ray.hitX, ray.hitY = nil, nil
+        local hit = false
+
+        world:rayCast(
+            ray[1], ray[2],
+            ray[3], ray[4],
+            function(fixture, x, y, nx, ny, fraction)
+                local col = fixture:getUserData()
+                if col and col.collision_class == "Lookies" then
+                    hit = true
+                    ray.hitX, ray.hitY = x, y
+                    return 0    -- stop the ray here
+                end
+                return 1        -- keep going otherwise
+            end
+        )
+
+        if hit then
+            self.foundLookie = true
+            break
+        end
+    end
+end
+
 local py_offset = 0.5
 
 function player:draw(alpha)
@@ -228,6 +260,7 @@ function player:debugVisionCone(segments, fill)
 end
 
 function player:debug()
+    love.graphics.setLineWidth(0.25)
     love.graphics.setColor(1, 1, 0)
     love.graphics.circle("fill", self.eye[1], self.eye[2], 0.5)
     love.graphics.setColor(1, 0, 0)
@@ -235,7 +268,19 @@ function player:debug()
 
     self:debugVisionCone()
     love.graphics.setColor(1, 1, 0, 0.6)
-    self:debugRays()
+    -- self:debugRays()
+
+    if self.foundLookie then
+        love.graphics.setColor(1,0,1)
+        for _, ray in ipairs(self.rays) do
+            if ray.hitX then
+                love.graphics.line(ray[1], ray[2], ray.hitX, ray.hitY)
+                break
+            end
+        end
+        love.graphics.setColor(1,1,1)
+    end
+    love.graphics.setLineWidth(1)
 end
 
 function player:getVisionDir()
