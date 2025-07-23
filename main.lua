@@ -32,11 +32,11 @@ function love.load()
     initMap()
 end
 
-lookies = false
 
 function love.update(dt)
     world:update(dt)
     state:update(dt)
+    lookies = false
     local player = state:getActor("player") 
 
     if player then
@@ -46,12 +46,36 @@ function love.update(dt)
 
         cam:lookAt(cam_x, cam_y)
 
-        for _, v in ipairs(player.rays) do
-            local colliders = world:queryLine(v[1], v[2], v[3], v[4], {"Lookies"})
-            if next(colliders) == nil then
-                lookies = false
-            else
-                lookies = true
+        -- for _, v in ipairs(player.rays) do
+        --     local colliders = world:queryLine(v[1], v[2], v[3], v[4], {"Lookies"})
+        --     if next(colliders) == nil then
+        --         lookies = false
+        --     else
+        --         lookies = true
+        --     end
+        -- end
+
+        for _, ray in ipairs(player.rays) do
+            -- clear old hit
+            ray.hitX, ray.hitY = nil, nil
+
+            world:rayCast(
+                ray[1], ray[2],
+                ray[3], ray[4],
+                function(fixture, x, y, nx, ny, fraction)
+                    local col = fixture:getUserData()
+                    if col and col.collision_class == "Lookies" then
+                        lookies = true
+                        ray.hitX, ray.hitY = x, y
+                        return 0    -- stop the ray here
+                    end
+                    return 1        -- keep going otherwise
+                end
+            )
+
+            if lookies then
+                -- we found our Lookies; no need to test more rays
+                break
             end
         end
 
@@ -78,6 +102,18 @@ function love.draw()
     if player then
         cam:attach()
             player:draw(ambientModifier + player_readability)
+
+            if lookies then
+                love.graphics.setColor(1,0,1)
+                for _, ray in ipairs(player.rays) do
+                    if ray.hitX then
+                        love.graphics.line(ray[1], ray[2], ray.hitX, ray.hitY)
+                        break
+                    end
+                end
+                love.graphics.setColor(1,1,1)
+            end
+
             if debug then
                 world:draw(0.5)
                 drawMapBorders()
@@ -87,7 +123,7 @@ function love.draw()
         
         love.graphics.setColor(1, 1, 1)
         love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
-        love.graphics.print("lookies: " .. tostring(lookies), 10, 30)
+        love.graphics.print("detection scaled: " .. player.detectionScale, 10, 30)
     end
 end
 
