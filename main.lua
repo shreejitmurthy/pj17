@@ -32,6 +32,8 @@ function love.load()
     initMap()
 end
 
+lookies = false
+
 function love.update(dt)
     world:update(dt)
     state:update(dt)
@@ -43,6 +45,15 @@ function love.update(dt)
         cam_y = lerpc(cam_y, player.y, lerpSpeed, dt)
 
         cam:lookAt(cam_x, cam_y)
+
+        for _, v in ipairs(player.rays) do
+            local colliders = world:queryLine(v[1], v[2], v[3], v[4], {"Lookies"})
+            if next(colliders) == nil then
+                lookies = false
+            else
+                lookies = true
+            end
+        end
 
         vision_shader:send("playerPos", player:getWorldPos())
         vision_shader:send("playerDir", player:getDirVec(dt))
@@ -56,6 +67,8 @@ end
 
 local debug = false
 
+local player_readability = 0.1
+
 function love.draw()
     love.graphics.setBackgroundColor(0.5, 0.5, 0.5)
     local player = state:getActor("player")
@@ -64,7 +77,7 @@ function love.draw()
     
     if player then
         cam:attach()
-            player:draw(0.3)
+            player:draw(ambientModifier + player_readability)
             if debug then
                 world:draw(0.5)
                 drawMapBorders()
@@ -74,7 +87,7 @@ function love.draw()
         
         love.graphics.setColor(1, 1, 1)
         love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
-        love.graphics.print("fov: " .. player.fovn, 10, 30)
+        love.graphics.print("lookies: " .. tostring(lookies), 10, 30)
     end
 end
 
