@@ -186,21 +186,35 @@ function player:debugVisionCone(segments, fill)
 end
 
 function player:shootRays(rayCount)
-    local rays = {}
     rayCount = rayCount or 12
-    local ex, ey = unpack(self.eye)
-    local halfFOV = math.rad(self.fovn) * 0.5
-    local startAngle = self.visionAngle - halfFOV
-    local angleStep  = (halfFOV * 2) / rayCount
+
+    -- recompute eye (if you haven't already)
+    local eyeOffsetDir = self.visionDir or 1
+    local ex = self.x + (self.eye_x/2 - 2.75) * eyeOffsetDir
+    local ey = self.y + 1
+
+    -- full cone half‐angle
+    local halfFOV  = math.rad(self.fovn) * 0.5
+    -- subtract the feathered region
+    local softness = halfFOV * coneEdgeSoftness
+    -- half-angle of the full-opacity core
+    local innerHalf = halfFOV - softness
+
+    -- spread rays inside that core
+    local startAngle = self.visionAngle - innerHalf
+    local angleStep  = (innerHalf * 2) / rayCount
+
+    local rays = {}
     for i = 0, rayCount do
-        local a = startAngle + i * angleStep
+        local a  = startAngle + i * angleStep
         local dx = math.cos(a) * self.length
         local dy = math.sin(a) * self.length
-        -- love.graphics.line(ex, ey, ex + dx, ey + dy)
-        rays[#rays+1] = {ex, ey, ex + dx, ey + dy}
+        rays[#rays+1] = { ex, ey, ex + dx, ey + dy }
     end
+
     return rays
 end
+
 
 function player:debugRays()
     for _, v in ipairs(self.rays) do
