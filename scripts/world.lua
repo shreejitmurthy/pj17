@@ -18,6 +18,7 @@ function drawMapBorders()
     love.graphics.line(0, map_height, map_width, gameMap.layers["Platform"].height * 8)
     love.graphics.line(map_width, map_height, map_width, 0)
     love.graphics.line(map_width, 0, 0, 0)
+    love.graphics.setLineWidth(1)
 end
 
 function createCollidable(object, collisionClass)
