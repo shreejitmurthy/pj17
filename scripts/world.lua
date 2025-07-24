@@ -3,7 +3,8 @@ sti = require "lib.sti"
 world = wf.newWorld(0, 600, true)
 world:addCollisionClass("Player")
 world:addCollisionClass("Ground")
-world:addCollisionClass("Lookies")
+world:addCollisionClass("Look_Floor")
+world:addCollisionClass("NoLook_Platform")
 
 gameMap = sti("res/maps/test.lua")
 
@@ -21,25 +22,72 @@ function drawMapBorders()
     love.graphics.setLineWidth(1)
 end
 
+-- function createCollidable(object, collisionClass)
+--     local collidable
+--     if object.shape == "rectangle" then
+--         collidable = world:newRectangleCollider(object.x, object.y, object.width, object.height)
+--     elseif object.shape == "polygon" then
+--         local vertices = {}
+--         for _, vertex in pairs(object.polygon) do
+--             vertices[#vertices+1] = vertex.x
+--             vertices[#vertices+1] = vertex.y
+--         end
+--         collidable = world:newPolygonCollider(vertices)
+--     end
+--     if collidable then
+--         collidable:setType('static')
+--         collidable:setCollisionClass(collisionClass)
+--         collidable:setObject(collidable)
+--     end
+--     return collidable
+-- end
+
 function createCollidable(object, collisionClass)
     local collidable
+
     if object.shape == "rectangle" then
-        collidable = world:newRectangleCollider(object.x, object.y, object.width, object.height)
+        collidable = world:newRectangleCollider(
+            object.x, object.y,
+            object.width, object.height
+        )
     elseif object.shape == "polygon" then
-        local vertices = {}
-        for _, vertex in pairs(object.polygon) do
-            vertices[#vertices+1] = vertex.x
-            vertices[#vertices+1] = vertex.y
+        local verts = {}
+        for _, v in ipairs(object.polygon) do
+            verts[#verts+1] = v.x
+            verts[#verts+1] = v.y
         end
-        collidable = world:newPolygonCollider(vertices)
+        collidable = world:newPolygonCollider(verts)
     end
-    if collidable then
-        collidable:setType('static')
-        collidable:setCollisionClass(collisionClass)
-        collidable:setObject(collidable)
+
+    if not collidable then return end
+
+    collidable:setType("static")
+    collidable:setCollisionClass(collisionClass)
+    collidable:setObject(collidable)
+
+    -- **per–tile state**  
+    collidable.isFound = false
+
+    -- install per–tile preSolve
+    local prefix = collisionClass:match("^(.-)_")
+    if prefix == "Look" or prefix == "NoLook" then
+        local isLook = (prefix == "Look")
+        collidable:setPreSolve(function(selfCol, otherCol, contact)
+            -- only care when Player hits this tile
+            if otherCol.collision_class ~= "Player" then return end
+
+            -- enable only if this tile’s isFound matches the rule
+            if isLook then
+                contact:setEnabled(selfCol.isFound)
+            else
+                contact:setEnabled(not selfCol.isFound)
+            end
+        end)
     end
+
     return collidable
 end
+
 
 function processLayer(layerName, collisionClass)
     if gameMap.layers[layerName] then
@@ -56,8 +104,8 @@ function initMap()
     collidables = {}
 
     processLayer("Ground", "Ground")
-    processLayer("Lookies", "Lookies")
-    -- processLayer("Things you cant hold", "Unholdables")
+    processLayer("Look_Floor", "Look_Floor")
+    processLayer("NoLook_Platform", "NoLook_Platform")
 
     -- if gameMap.layers["Climbable"] then
     --     for _, object in pairs(gameMap.layers["Climbable"].objects) do

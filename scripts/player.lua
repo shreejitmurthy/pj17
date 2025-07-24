@@ -5,6 +5,7 @@ states = {
     RUN = 1,
     BACKRUN = 2,
     JUMP = 3,
+    CLOSE = 4,
 }
 
 player = {}
@@ -27,9 +28,11 @@ function player:init()
         close = {"lshift"}
     }
 
+    p.foundLookie = false
+
     p.vx = 0
     p.vy = 0
-    p.collider = world:newBSGRectangleCollider(p.x, p.y, 12, 16, 3)
+    p.collider = world:newBSGRectangleCollider(p.x, p.y, 10, 14, 3)
     p.collider:setFixedRotation(true)
     p.collider:setCollisionClass("Player")
     
@@ -51,7 +54,6 @@ function player:init()
 
     p.rays = {}
 
-    p.foundLookie = false
 
     p.state = states.IDLE
 
@@ -190,30 +192,28 @@ function player:shootRays(rayCount)
 end
 
 function player:scanVisionCone()
-    self.foundLookie = false
+    for _, tile in ipairs(collidables) do
+        tile.isFound = false
+    end
+
     for _, ray in ipairs(self.rays) do
-        -- clear old hit
-        ray.hitX, ray.hitY = nil, nil
-        local hit = false
-
-        world:rayCast(
-            ray[1], ray[2],
-            ray[3], ray[4],
-            function(fixture, x, y, nx, ny, fraction)
-                local col = fixture:getUserData()
-                if col and col.collision_class == "Lookies" then
-                    hit = true
-                    ray.hitX, ray.hitY = x, y
-                    return 0    -- stop the ray here
-                end
-                return 1        -- keep going otherwise
+        world:rayCast(ray[1], ray[2], ray[3], ray[4],
+          function(fixture, x, y, nx, ny, frac)
+            local tile = fixture:getUserData()
+            if not tile or not tile.collision_class then
+              return 1
             end
-        )
 
-        if hit then
-            self.foundLookie = true
-            break
+            local prefix = tile.collision_class:match("^(.-)_")
+            if prefix == "Look" or prefix == "NoLook" then
+              -- mark *this* tile as seen
+              tile.isFound = true
+              -- if it’s a Look tile, stop the ray here
+              if prefix == "Look" then return 0 end
+            end
+            return 1
         end
+        )
     end
 end
 

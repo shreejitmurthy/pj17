@@ -79,7 +79,7 @@ function love.draw()
         
         love.graphics.setColor(1, 1, 1)
         love.graphics.print("(" .. math.floor(player.x) .. ", " .. math.floor(player.y) .. ")", 10, 10)
-        love.graphics.print("detection scaled: " .. player.detectionScale, 10, 30)
+        love.graphics.print("found: " .. tostring(player.foundLookie), 10, 30)
     end
 end
 
