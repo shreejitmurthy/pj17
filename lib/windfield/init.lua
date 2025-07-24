@@ -74,34 +74,52 @@ function World:update(dt)
 end
 
 function World:draw(alpha)
-    -- get the current color values to reapply
     local r, g, b, a = love.graphics.getColor()
-    -- alpha value is optional
-    alpha = alpha or 255
-    -- Colliders debug
-    -- Shree: Change colour of colliders
-    love.graphics.setColor(0.7, 0, 0, alpha)
-    -- Original: love.graphics.setColor(222, 222, 222, alpha)
-    local bodies = self.box2d_world:getBodies()
-    for _, body in ipairs(bodies) do
-        local fixtures = body:getFixtures()
-        for _, fixture in ipairs(fixtures) do
-            if fixture:getShape():type() == 'PolygonShape' then
-                love.graphics.polygon('line', body:getWorldPoints(fixture:getShape():getPoints()))
-            elseif fixture:getShape():type() == 'EdgeShape' or fixture:getShape():type() == 'ChainShape' then
-                local points = {body:getWorldPoints(fixture:getShape():getPoints())}
-                for i = 1, #points, 2 do
-                    if i < #points-2 then love.graphics.line(points[i], points[i+1], points[i+2], points[i+3]) end
+    alpha = alpha or 1          -- love2d ≥11 uses 0–1 ranges
+
+    for _, body in ipairs(self.box2d_world:getBodies()) do
+        for _, fixture in ipairs(body:getFixtures()) do
+            -- pull out your wf.Collider
+            local wfCol = fixture:getUserData()
+            local enabled = true
+
+            if wfCol and wfCol.collision_class then
+                local prefix = wfCol.collision_class:match("^(.-)_") or wfCol.collision_class
+
+                if prefix == "Look" then
+                    enabled = player.foundLookie
+                elseif prefix == "NoLook" then
+                    enabled = not player.foundLookie
                 end
-            elseif fixture:getShape():type() == 'CircleShape' then
-                local body_x, body_y = body:getPosition()
-                local shape_x, shape_y = fixture:getShape():getPoint()
-                local r = fixture:getShape():getRadius()
-                love.graphics.circle('line', body_x + shape_x, body_y + shape_y, r, 360)
+            end
+
+            -- pick our debug colour
+            if enabled then
+                love.graphics.setColor(1, 0, 0, alpha)     -- red for “enabled”
+            else
+                love.graphics.setColor(0.5, 0, 0.5, alpha) -- purple for “disabled”
+            end
+
+            -- now draw whatever shape this fixture has
+            local shape = fixture:getShape()
+            local t = shape:type()
+            if     t == "PolygonShape" then
+                love.graphics.polygon("line", body:getWorldPoints(shape:getPoints()))
+            elseif t == "EdgeShape" or t == "ChainShape" then
+                local pts = { body:getWorldPoints(shape:getPoints()) }
+                for i = 1, #pts-2, 2 do
+                    love.graphics.line(pts[i], pts[i+1], pts[i+2], pts[i+3])
+                end
+            elseif t == "CircleShape" then
+                local bx, by = body:getPosition()
+                local ox, oy = shape:getPoint()
+                love.graphics.circle("line", bx+ox, by+oy, shape:getRadius())
             end
         end
     end
-    love.graphics.setColor(255, 255, 255, alpha)
+
+    -- restore original colour & draw joints / queries if you like…
+    love.graphics.setColor(r, g, b, a)
 
     -- Joint debug
     love.graphics.setColor(222, 128, 64, alpha)
